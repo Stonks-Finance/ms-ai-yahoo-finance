@@ -4,9 +4,9 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from SEEDS import set_seed
-from typing import Tuple
+from typing import Tuple, List
 
-SEED = 6
+SEED: int = 6
 set_seed(SEED)
 
 
@@ -29,7 +29,7 @@ def prepare_data (stock_name: str, interval: str = "1h") -> Tuple[np.ndarray, np
         
         data.index = pd.to_datetime(data.index)
         data.dropna(inplace=True)
-        train_data, test_data = train_test_split(data[["Adj Close"]],test_size=0.2,shuffle=False,random_state=SEED)
+        train_data, test_data = train_test_split(data[["Adj Close"]], test_size=0.2, shuffle=False, random_state=SEED)
         train_data_sc, test_data_sc = scale_data(train_data[["Adj Close"]], test_data[["Adj Close"]])
         
         return train_data_sc, test_data_sc
@@ -39,7 +39,8 @@ def prepare_data (stock_name: str, interval: str = "1h") -> Tuple[np.ndarray, np
 
 
 def create_sequences (datas: np.ndarray, seq_length: int = 20) -> Tuple[np.ndarray, np.ndarray]:
-    x,y=[],[]
+    x: List = []
+    y: List = []
     for i in range(len(datas) - seq_length):
         x.append(datas[i:i + seq_length])
         y.append(datas[i + seq_length])
