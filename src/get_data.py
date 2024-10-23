@@ -29,7 +29,11 @@ def prepare_data (stock_name: str, interval: str = "1h") -> Tuple[np.ndarray, np
         
         data.index = pd.to_datetime(data.index)
         data.dropna(inplace=True)
-        train_data, test_data = train_test_split(data[["Adj Close"]], test_size=0.2, shuffle=False, random_state=SEED)
+        train_data, test_data = train_test_split(data[["Adj Close"]],
+                                                 test_size=0.2,
+                                                 shuffle=False,
+                                                 random_state=SEED)
+        
         train_data_sc, test_data_sc = scale_data(train_data[["Adj Close"]], test_data[["Adj Close"]])
         
         return train_data_sc, test_data_sc
