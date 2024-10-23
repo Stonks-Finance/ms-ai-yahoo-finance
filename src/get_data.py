@@ -9,9 +9,10 @@ from typing import Tuple, List
 SEED: int = 6
 set_seed(SEED)
 
+scaler=MinMaxScaler
 
 def scale_data (train_data: pd.DataFrame, test_data: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
-    scaler = MinMaxScaler()
+    global scaler
     train_scaled: np.ndarray = scaler.fit_transform(train_data)
     test_scaled: np.ndarray = scaler.transform(test_data)
     return train_scaled, test_scaled
