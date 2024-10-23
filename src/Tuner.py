@@ -46,6 +46,20 @@ class Tuner:
             return model
         except Exception as e:
             raise TuningException(f"Error building model: {str(e)}")
+    @staticmethod
+    def __plot(model,X,Y,stock_symbol:str):
+        y_pred = model.predict(X)
+        y_pred_rescaled = scaler.inverse_transform(y_pred.reshape(-1, 1))
+        Y_rescaled = scaler.inverse_transform(Y.reshape(-1, 1))
+        
+        plt.figure(figsize=(14, 7))
+        plt.plot(Y_rescaled, color="blue", label="Actual Price")
+        plt.plot(y_pred_rescaled, color="red", label="Predicted Price")
+        plt.title(f"Actual vs Predicted Stock Prices ({stock_symbol})")
+        plt.xlabel("Time")
+        plt.ylabel("Stock Price")
+        plt.legend()
+        plt.show()
     
     def tune (self,
               stock_symbol: str,
@@ -111,18 +125,7 @@ class Tuner:
                            verbose=verbose)
             
             if plot:
-                y_pred = best_model.predict(X_val)
-                y_pred_rescaled = scaler.inverse_transform(y_pred.reshape(-1, 1))
-                y_val_rescaled = scaler.inverse_transform(y_val.reshape(-1, 1))
-                
-                plt.figure(figsize=(14, 7))
-                plt.plot(y_val_rescaled, color="blue", label="Actual Price")
-                plt.plot(y_pred_rescaled, color="red", label="Predicted Price")
-                plt.title(f"Actual vs Predicted Stock Prices ({stock_symbol})")
-                plt.xlabel("Time")
-                plt.ylabel("Stock Price")
-                plt.legend()
-                plt.show()
+                self.__plot(best_model,X_val,y_val,stock_symbol)
             
             return best_model
         except Exception as e:
