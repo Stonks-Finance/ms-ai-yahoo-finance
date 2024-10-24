@@ -1,5 +1,5 @@
 from keras_tuner import RandomSearch, HyperParameters
-from get_data import create_sequences, prepare_data, scaler
+from src.get_data import create_sequences, prepare_data, scaler
 import keras
 from matplotlib import pyplot as plt
 from typing import Optional
@@ -11,23 +11,28 @@ class TuningException(Exception):
 
 
 class Tuner:
-    def __init__ (self, project_name: str, max_trials: int = 10, executions_per_trial: int = 3,
+    def __init__ (self,
+                  project_name: str,
+                  fmt:str, max_trials: int = 10,
+                  executions_per_trial: int = 3,
                   directory: str = "tuner_dir") -> None:
+        
         self.max_trials: int = max_trials
         self.executions_per_trial: int = executions_per_trial
         self.directory: str = directory
         self.project_name: str = project_name
         self.tuner: Optional[RandomSearch] = None
+        self.fmt:str=fmt
     
     @staticmethod
-    def validate_dropout_params (dropout: bool, dropout_deg: float) -> None:
+    def __validate_dropout_params (dropout: bool, dropout_deg: float) -> None:
         if dropout and (not 0 < dropout_deg < 1):
             raise TuningException(f"Invalid dropout_deg value: {dropout_deg}. It should be between 0 and 1.")
     
     @staticmethod
     def build_model (hp: HyperParameters, dropout: bool = False, dropout_deg: float = 0.0) -> keras.Model:
         try:
-            Tuner.validate_dropout_params(dropout, dropout_deg)
+            Tuner.__validate_dropout_params(dropout, dropout_deg)
             
             lstm_units = hp.Int("lstm_units", min_value=32, max_value=128, step=32)
             num_layers = hp.Int("num_layers", min_value=1, max_value=3)
@@ -42,7 +47,7 @@ class Tuner:
                     model.add(keras.layers.Dropout(dropout_deg))
             model.add(keras.layers.Dense(1))
             
-            model.compile(optimizer=keras.optimizers.Adam(learning_rate=learning_rate), loss='mean_squared_error')
+            model.compile(optimizer=keras.optimizers.Adam(learning_rate=learning_rate), loss="mean_squared_error")
             return model
         except Exception as e:
             raise TuningException(f"Error building model: {str(e)}")
@@ -96,7 +101,7 @@ class Tuner:
                                                   patience=3,
                                                   verbose=1,
                                                   min_lr=1e-6),
-                keras.callbacks.ModelCheckpoint(filepath=f"{self.directory}/{self.project_name}_best_model.h5",
+                keras.callbacks.ModelCheckpoint(filepath=f"{self.directory}/{self.project_name}_best_model{self.fmt}",
                                                 monitor=metric,
                                                 save_best_only=True,
                                                 verbose=1)
@@ -110,10 +115,10 @@ class Tuner:
                               verbose=verbose)
             
             best_hps = self.tuner.get_best_hyperparameters(num_trials=1)[0]
-            print(f"Best LSTM units: {best_hps.get('lstm_units')}")
-            print(f"Best number of layers: {best_hps.get('num_layers')}")
-            print(f"Best sequence length: {best_hps.get('seq_length')}")
-            print(f"Best learning rate: {best_hps.get('learning_rate')}")
+            print(f"Best LSTM units: {best_hps.get("lstm_units")}")
+            print(f"Best number of layers: {best_hps.get("num_layers")}")
+            print(f"Best sequence length: {best_hps.get("seq_length")}")
+            print(f"Best learning rate: {best_hps.get("learning_rate")}")
             
             best_model = self.tuner.hypermodel.build(best_hps)
             best_model.fit(X_train,

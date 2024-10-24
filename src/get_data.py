@@ -3,13 +3,13 @@ import yfinance as yf
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
-from SEEDS import set_seed
+from src.SEEDS import set_seed
 from typing import Tuple, List
 
 SEED: int = 6
 set_seed(SEED)
 
-scaler=MinMaxScaler
+scaler=MinMaxScaler()
 
 def scale_data (train_data: pd.DataFrame, test_data: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
     global scaler
