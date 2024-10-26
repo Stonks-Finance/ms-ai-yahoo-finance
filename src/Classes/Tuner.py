@@ -1,3 +1,4 @@
+import os
 import keras
 from keras_tuner import RandomSearch, HyperParameters
 from src.get_data import create_sequences, prepare_data, scaler
@@ -16,11 +17,13 @@ class Tuner:
                   fmt: str,
                   max_trials: int = 10,
                   executions_per_trial: int = 3,
-                  directory: str = "tuning_histories") -> None:
+                  directory: str = "tuning_histories",
+                  models_directory: str = "models") -> None:
         
         self.max_trials: int = max_trials
         self.executions_per_trial: int = executions_per_trial
         self.directory: str = directory
+        self.models_directory: str = models_directory
         self.project_name: str = ""
         self.tuner: Optional[RandomSearch] = None
         self.fmt: str = fmt
@@ -93,10 +96,11 @@ class Tuner:
             
             X_train, y_train = create_sequences(train_data_scaled)
             X_val, y_val = create_sequences(test_data_scaled)
-            
-            keras_filepath = f"models/{stock_symbol}/{interval}_{stock_symbol}_best_model.keras"
-            h5_filepath = f"models/{stock_symbol}/{interval}_{stock_symbol}_best_model.h5"
-            
+
+            keras_filepath = os.path.join(self.models_directory,
+                                          f"{stock_symbol}/{interval}_{stock_symbol}_best_model.keras")
+            h5_filepath = os.path.join(self.models_directory, f"{stock_symbol}/{interval}_{stock_symbol}_best_model.h5")
+
             callbacks = [
                 keras.callbacks.EarlyStopping(monitor=metric,
                                               patience=5,

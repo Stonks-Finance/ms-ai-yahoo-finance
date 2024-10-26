@@ -1,3 +1,4 @@
+import os
 import keras
 from src.Classes.Tuner import Tuner
 from typing import List, Dict
@@ -10,17 +11,23 @@ class ModelCreator(Tuner):
                   intervals: List[str],
                   max_trials: int = 10,
                   executions_per_trial: int = 3,
-                  directory: str = "tuning_histories",
+                  directory: str = "tuning_histories"
                   ) -> None:
+
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+
+        tuning_histories_dir = os.path.join(project_root, directory)
+        models_dir = os.path.join(project_root, "models")
         
         super().__init__(fmt,
                          max_trials,
                          executions_per_trial,
-                         directory)
+                         tuning_histories_dir,
+                         models_dir)
         
         self.stock_symbol = stock_symbol
         self.intervals = intervals
-        self.models = None
+        self.models = models_dir
     
     def train_tune (self,
                     epochs: int = 10,
