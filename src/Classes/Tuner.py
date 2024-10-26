@@ -77,7 +77,7 @@ class Tuner:
               plot: bool = False,
               verbose: bool = True) -> Optional[keras.Model]:
         try:
-            self.project_name = f"{stock_symbol}_{interval}_tuning_hist"
+            self.project_name = f"{stock_symbol}/{stock_symbol}_{interval}_tuning_hist"
             self.tuner = RandomSearch(
                 self.__build_model,
                 objective=metric,
