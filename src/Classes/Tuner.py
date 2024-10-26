@@ -1,9 +1,9 @@
 import keras
 from keras_tuner import RandomSearch, HyperParameters
 from src.get_data import create_sequences, prepare_data, scaler
-from src.ConvertToH5Callback import _ConvertToH5Callback
+from src.Classes.ConvertToH5Callback import _ConvertToH5Callback
 from matplotlib import pyplot as plt
-from typing import Optional, List, Dict
+from typing import Optional
 
 
 class TuningException(Exception):
@@ -94,8 +94,8 @@ class Tuner:
             X_train, y_train = create_sequences(train_data_scaled)
             X_val, y_val = create_sequences(test_data_scaled)
             
-            keras_filepath = f"AI/models/{stock_symbol}/{interval}_{stock_symbol}_best_model.keras"
-            h5_filepath = f"AI/models/{stock_symbol}/{interval}_{stock_symbol}_best_model.h5"
+            keras_filepath = f"models/{stock_symbol}/{interval}_{stock_symbol}_best_model.keras"
+            h5_filepath = f"models/{stock_symbol}/{interval}_{stock_symbol}_best_model.h5"
             
             callbacks = [
                 keras.callbacks.EarlyStopping(monitor=metric,

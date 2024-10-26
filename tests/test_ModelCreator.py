@@ -1,6 +1,6 @@
 import unittest
-from unittest.mock import patch, MagicMock
-from src.ModelCreator import ModelCreator
+from unittest.mock import patch
+from src.Classes.ModelCreator import ModelCreator
 from keras.models import Sequential
 
 class TestModelCreator(unittest.TestCase):

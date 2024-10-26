@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from src.Tuner import Tuner
+from src.Classes.Tuner import Tuner
 
 
 class TestTuner(unittest.TestCase):

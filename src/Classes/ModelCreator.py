@@ -1,5 +1,5 @@
 import keras
-from src.Tuner import Tuner
+from src.Classes.Tuner import Tuner
 from typing import List, Dict
 
 
@@ -34,7 +34,7 @@ class ModelCreator(Tuner):
             model_name: str = f"{interval}_{self.stock_symbol}_model"
             print(f"Tuning for interval: {interval}")
             
-            models[model_name] = self.__tune(self.stock_symbol,
+            models[model_name] = self._Tuner__tune(self.stock_symbol,
                                            interval,
                                            epochs,
                                            batch_size,
