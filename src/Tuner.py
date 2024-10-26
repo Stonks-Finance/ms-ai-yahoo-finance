@@ -1,8 +1,9 @@
+import keras
 from keras_tuner import RandomSearch, HyperParameters
 from src.get_data import create_sequences, prepare_data, scaler
-import keras
+from src.ConvertToH5Callback import _ConvertToH5Callback
 from matplotlib import pyplot as plt
-from typing import Optional
+from typing import Optional, List, Dict
 
 
 class TuningException(Exception):
@@ -12,25 +13,25 @@ class TuningException(Exception):
 
 class Tuner:
     def __init__ (self,
-                  project_name: str,
-                  fmt:str, max_trials: int = 10,
+                  fmt: str,
+                  max_trials: int = 10,
                   executions_per_trial: int = 3,
-                  directory: str = "tuner_dir") -> None:
+                  directory: str = "tuning_histories") -> None:
         
         self.max_trials: int = max_trials
         self.executions_per_trial: int = executions_per_trial
         self.directory: str = directory
-        self.project_name: str = project_name
+        self.project_name: str = ""
         self.tuner: Optional[RandomSearch] = None
-        self.fmt:str=fmt
+        self.fmt: str = fmt
     
     @staticmethod
     def __validate_dropout_params (dropout: bool, dropout_deg: float) -> None:
-        if dropout and (not 0 < dropout_deg < 1):
+        if dropout and not (0 < dropout_deg < 1):
             raise TuningException(f"Invalid dropout_deg value: {dropout_deg}. It should be between 0 and 1.")
     
     @staticmethod
-    def build_model (hp: HyperParameters, dropout: bool = False, dropout_deg: float = 0.0) -> keras.Model:
+    def __build_model (hp: HyperParameters, dropout: bool = False, dropout_deg: float = 0.0) -> keras.Model:
         try:
             Tuner.__validate_dropout_params(dropout, dropout_deg)
             
@@ -51,8 +52,9 @@ class Tuner:
             return model
         except Exception as e:
             raise TuningException(f"Error building model: {str(e)}")
+    
     @staticmethod
-    def __plot(model,X,Y,stock_symbol:str):
+    def __plot (model, X, Y, stock_symbol: str):
         y_pred = model.predict(X)
         y_pred_rescaled = scaler.inverse_transform(y_pred.reshape(-1, 1))
         Y_rescaled = scaler.inverse_transform(Y.reshape(-1, 1))
@@ -66,7 +68,7 @@ class Tuner:
         plt.legend()
         plt.show()
     
-    def tune (self,
+    def __tune (self,
               stock_symbol: str,
               interval: str,
               epochs: int = 10,
@@ -75,8 +77,9 @@ class Tuner:
               plot: bool = False,
               verbose: bool = True) -> Optional[keras.Model]:
         try:
+            self.project_name = f"{stock_symbol}_{interval}_tuning_hist"
             self.tuner = RandomSearch(
-                self.build_model,
+                self.__build_model,
                 objective=metric,
                 max_trials=self.max_trials,
                 executions_per_trial=self.executions_per_trial,
@@ -91,21 +94,29 @@ class Tuner:
             X_train, y_train = create_sequences(train_data_scaled)
             X_val, y_val = create_sequences(test_data_scaled)
             
+            keras_filepath = f"AI/models/{stock_symbol}/{interval}_{stock_symbol}_best_model.keras"
+            h5_filepath = f"AI/models/{stock_symbol}/{interval}_{stock_symbol}_best_model.h5"
+            
             callbacks = [
                 keras.callbacks.EarlyStopping(monitor=metric,
                                               patience=5,
                                               restore_best_weights=True,
                                               verbose=1),
+                
                 keras.callbacks.ReduceLROnPlateau(monitor=metric,
                                                   factor=0.5,
                                                   patience=3,
                                                   verbose=1,
                                                   min_lr=1e-6),
-                keras.callbacks.ModelCheckpoint(filepath=f"{self.directory}/{self.project_name}_best_model{self.fmt}",
+                
+                keras.callbacks.ModelCheckpoint(filepath=keras_filepath,
                                                 monitor=metric,
                                                 save_best_only=True,
-                                                verbose=1)
+                                                verbose=1),
+                
+                _ConvertToH5Callback(keras_filepath=keras_filepath, h5_filepath=h5_filepath)
             ]
+            
             self.tuner.search(X_train,
                               y_train,
                               epochs=epochs,
@@ -130,7 +141,7 @@ class Tuner:
                            verbose=verbose)
             
             if plot:
-                self.__plot(best_model,X_val,y_val,stock_symbol)
+                self.__plot(best_model, X_val, y_val, stock_symbol)
             
             return best_model
         except Exception as e:
