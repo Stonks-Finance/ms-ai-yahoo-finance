@@ -7,7 +7,7 @@ import numpy as np
 import uvicorn
 import keras
 from datetime import timedelta
-from src.get_data import create_sequences, scaler
+from src.get_data import create_sequences, scaler,__pipe
 import os
 
 api = FastAPI()
@@ -39,6 +39,7 @@ def predict_data(stock_name: str, interval: str, duration: int) -> Dict[str, Lis
 
     df.index = pd.to_datetime(df.index)
     df = df[["Adj Close"]].dropna()
+    df=__pipe(df)
     scaled_data = scaler.fit_transform(df)
     x_seq, _ = create_sequences(scaled_data)
     last_seq = x_seq[-1].reshape(1, x_seq.shape[1], x_seq.shape[2])
