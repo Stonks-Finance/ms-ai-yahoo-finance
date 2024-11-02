@@ -1,10 +1,10 @@
 import datetime
 from fastapi import APIRouter, Query
 from pydantic import BaseModel
-from typing import List, Dict
+from typing import List, Dict, Optional
 import yfinance as yf
-from dateutil.relativedelta import relativedelta
-from api.Enums.Duration import MaxDurationLimit
+from src.Enums.MaxDurationLimit import MaxDurationLimit
+from src.Enums.DefaultDurations import DefaultDurations
 
 router = APIRouter()
 
@@ -17,15 +17,14 @@ class PastValuesResponse(BaseModel):
 
 
 def fetch_past_stock_data (stock_name: str, interval: str, duration: int) -> Dict[str, List]:
-    end_date = datetime.datetime.now()
-    start_date = None
-    
-    if interval == "1d":
-        start_date = end_date - datetime.timedelta(days=duration)
-    elif interval == "1mo":
-        start_date = end_date - relativedelta(months=duration - 1)
-    
-    stock_data = yf.download(stock_name, start=start_date, end=end_date, interval=interval)
+    if interval == "1m":
+        period = "1d"
+    elif interval == "1h":
+        period = "1mo"
+
+    stock_data = yf.download(stock_name, period=period, interval=interval)
+
+    stock_data = stock_data.iloc[-duration:]
     
     if stock_data.empty:
         raise ValueError(f"No data found for stock '{stock_name}'.")
@@ -39,11 +38,30 @@ def fetch_past_stock_data (stock_name: str, interval: str, duration: int) -> Dic
 @router.get("/past-values", response_model=PastValuesResponse)
 async def past_values (
         stock_name: str,
-        interval: str = Query("1d", enum=[d.interval for d in MaxDurationLimit]),
-        duration: int = Query(7)
+        interval: str = Query("1h", enum=["1m", "1h"]),
+        duration: Optional[str] = Query(None)
 ):
-    max_duration = next((d.limit for d in MaxDurationLimit if d.interval == interval), float('inf'))
-    if duration > max_duration:
+    if interval == "1m":
+        max_duration = MaxDurationLimit.ONE_MINUTE.get_limit("PAST_VALUES")
+        default_duration = DefaultDurations.ONE_MINUTE.get_duration("PAST_VALUES")
+    elif interval == "1h":
+        max_duration = MaxDurationLimit.ONE_HOUR.get_limit("PAST_VALUES")
+        default_duration = DefaultDurations.ONE_HOUR.get_duration("PAST_VALUES")
+
+    if duration is None:
+        duration = default_duration
+    else:
+        try:
+            duration = int(duration)
+        except ValueError:
+            return {
+                "success": False,
+                "status": 422,
+                "message": "Duration should be an integer.",
+                "data": {"prices": [], "timestamps": []}
+            }
+
+    if duration > max_duration or duration < 1:
         return {
             "success": False,
             "status": 400,
