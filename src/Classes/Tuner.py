@@ -5,6 +5,7 @@ from src.get_data import create_sequences, prepare_data, scaler
 from src.Classes.ConvertToH5Callback import _ConvertToH5Callback
 from matplotlib import pyplot as plt
 from typing import Optional
+from settings import TUNING_HISTORIES_DIRECTORY
 
 
 class TuningException(Exception):
@@ -17,7 +18,7 @@ class Tuner:
                   fmt: str,
                   max_trials: int = 10,
                   executions_per_trial: int = 3,
-                  directory: str = "tuning_histories",
+                  directory: str = TUNING_HISTORIES_DIRECTORY,
                   models_directory: str = "models") -> None:
         
         self.max_trials: int = max_trials
@@ -44,7 +45,8 @@ class Tuner:
             learning_rate = hp.Float("learning_rate", min_value=1e-4, max_value=1e-2, sampling="log")
             
             model = keras.Sequential()
-            model.add(keras.layers.LSTM(lstm_units, input_shape=(seq_length, 1), return_sequences=(num_layers > 1)))
+            model.add(keras.layers.Input(shape=(seq_length, 1)))
+            model.add(keras.layers.LSTM(lstm_units, return_sequences=(num_layers > 1)))
             for i in range(1, num_layers):
                 model.add(keras.layers.LSTM(lstm_units, return_sequences=(i < num_layers - 1)))
                 if dropout:
@@ -72,15 +74,15 @@ class Tuner:
         plt.show()
     
     def __tune (self,
-              stock_symbol: str,
-              interval: str,
-              epochs: int = 10,
-              batch_size: int = 32,
-              metric: str = "val_loss",
-              plot: bool = False,
-              verbose: bool = True) -> Optional[keras.Model]:
+                stock_symbol: str,
+                interval: str,
+                epochs: int = 10,
+                batch_size: int = 32,
+                metric: str = "val_loss",
+                plot: bool = False,
+                _verbose: bool = True) -> Optional[keras.Model]:
         try:
-            self.project_name = f"{stock_symbol}/{stock_symbol}_{interval}_tuning_hist"
+            self.project_name = os.path.join(stock_symbol, f"{stock_symbol}_{interval}_tuning_hist")
             self.tuner = RandomSearch(
                 self.__build_model,
                 objective=metric,
@@ -96,27 +98,30 @@ class Tuner:
             
             X_train, y_train = create_sequences(train_data_scaled)
             X_val, y_val = create_sequences(test_data_scaled)
-
+            
             keras_filepath = os.path.join(self.models_directory,
-                                          f"{stock_symbol}/{interval}_{stock_symbol}_best_model.keras")
-            h5_filepath = os.path.join(self.models_directory, f"{stock_symbol}/{interval}_{stock_symbol}_best_model.h5")
-
+                                          stock_symbol,
+                                          f"{interval}_{stock_symbol}_best_model.keras")
+            h5_filepath = os.path.join(self.models_directory,
+                                       stock_symbol,
+                                       f"{interval}_{stock_symbol}_best_model.h5")
+            
             callbacks = [
                 keras.callbacks.EarlyStopping(monitor=metric,
                                               patience=5,
                                               restore_best_weights=True,
-                                              verbose=1),
+                                              verbose=_verbose),
                 
                 keras.callbacks.ReduceLROnPlateau(monitor=metric,
                                                   factor=0.5,
                                                   patience=3,
-                                                  verbose=1,
-                                                  min_lr=1e-6),
+                                                  min_lr=1e-6,
+                                                  verbose=_verbose),
                 
                 keras.callbacks.ModelCheckpoint(filepath=keras_filepath,
                                                 monitor=metric,
                                                 save_best_only=True,
-                                                verbose=1),
+                                                verbose=_verbose),
                 
                 _ConvertToH5Callback(keras_filepath=keras_filepath, h5_filepath=h5_filepath)
             ]
@@ -127,13 +132,14 @@ class Tuner:
                               validation_data=(X_val, y_val),
                               batch_size=batch_size,
                               callbacks=callbacks,
-                              verbose=verbose)
+                              verbose=_verbose)
             
             best_hps = self.tuner.get_best_hyperparameters(num_trials=1)[0]
-            print(f"Best LSTM units: {best_hps.get("lstm_units")}")
-            print(f"Best number of layers: {best_hps.get("num_layers")}")
-            print(f"Best sequence length: {best_hps.get("seq_length")}")
-            print(f"Best learning rate: {best_hps.get("learning_rate")}")
+            if _verbose:
+                print(f"Best LSTM units: {best_hps.get("lstm_units")}")
+                print(f"Best number of layers: {best_hps.get("num_layers")}")
+                print(f"Best sequence length: {best_hps.get("seq_length")}")
+                print(f"Best learning rate: {best_hps.get("learning_rate")}")
             
             best_model = self.tuner.hypermodel.build(best_hps)
             best_model.fit(X_train,
@@ -142,7 +148,7 @@ class Tuner:
                            validation_data=(X_val, y_val),
                            batch_size=batch_size,
                            callbacks=callbacks,
-                           verbose=verbose)
+                           verbose=_verbose)
             
             if plot:
                 self.__plot(best_model, X_val, y_val, stock_symbol)

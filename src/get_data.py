@@ -5,8 +5,8 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from src.SEEDS import set_seed
 from typing import Tuple, List,Callable
+from settings import SEED
 
-SEED: int = 6
 set_seed(SEED)
 
 scaler=MinMaxScaler()
