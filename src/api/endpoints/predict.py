@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Query
-from pydantic import BaseModel
 from typing import List, Dict, Optional
 from datetime import timedelta
 import yfinance as yf
@@ -11,22 +10,13 @@ from src.get_data import scaler, create_sequences
 from cachetools import TTLCache
 from src.Enums.MaxDurationLimit import MaxDurationLimit
 from src.Enums.DefaultDurations import DefaultDurations
+from src.Classes.APIRaisedError import APIRaisedError
+from src.Classes.APIResponseModel import PredictResponse
+
 
 router = APIRouter()
 cache = TTLCache(maxsize=100, ttl=600)
 
-
-class PredictResponse(BaseModel):
-    success: bool
-    status: int
-    message: str
-    data: Dict[str, List]
-
-
-class PredictionError(Exception):
-    def __init__(self, status: int, message: str):
-        self.status = status
-        self.message = message
 
 def fetch_stock_data(stock_name: str, period: str, interval: str) -> pd.DataFrame:
     """Fetch stock data from Yahoo Finance."""
@@ -36,7 +26,7 @@ def fetch_stock_data(stock_name: str, period: str, interval: str) -> pd.DataFram
 
     df = yf.download(stock_name, period=period, interval=interval)
     if df.empty:
-        raise PredictionError(404, "No data found for the specified stock.")
+        raise APIRaisedError(404, "No data found for the specified stock.")
 
     df.index = pd.to_datetime(df.index)
     df = df[["Adj Close"]].dropna()
@@ -52,7 +42,7 @@ def predict_data(stock_name: str, interval: str, duration: Optional[str]) -> Dic
         max_duration = MaxDurationLimit.ONE_HOUR.get_limit("PREDICT")
         default_duration = DefaultDurations.ONE_HOUR.get_duration("PREDICT")
     else:
-        raise PredictionError(400, f"Unsupported interval '{interval}'.")
+        raise APIRaisedError(400, f"Unsupported interval '{interval}'.")
 
     if duration is None:
         duration = default_duration
@@ -60,14 +50,14 @@ def predict_data(stock_name: str, interval: str, duration: Optional[str]) -> Dic
         try:
             duration = int(duration)
         except ValueError:
-            raise PredictionError(422, "Duration should be an integer.")
+            raise APIRaisedError(422, "Duration should be an integer.")
 
     if duration > max_duration or duration < 1:
-        raise PredictionError(400, f"Duration must be between 1 and {max_duration} for interval '{interval}'.")
+        raise APIRaisedError(400, f"Duration must be between 1 and {max_duration} for interval '{interval}'.")
 
     period = "max" if interval == "1m" else "2y" if interval == "1h" else None
     if period is None:
-        raise PredictionError(400, f"Unsupported interval '{interval}'.")
+        raise APIRaisedError(400, f"Unsupported interval '{interval}'.")
 
     df = fetch_stock_data(stock_name, period, interval)
 
@@ -77,12 +67,12 @@ def predict_data(stock_name: str, interval: str, duration: Optional[str]) -> Dic
 
     model_path = os.path.join("models", stock_name, f"{interval}_{stock_name}_best_model.keras")
     if not os.path.exists(model_path):
-        raise PredictionError(404, "Model file not found for specified stock.")
+        raise APIRaisedError(404, "Model file not found for specified stock.")
 
     try:
         model = keras.models.load_model(model_path)
     except Exception as e:
-        raise PredictionError(500, f"Error loading model: {str(e)}")
+        raise APIRaisedError(500, f"Error loading model: {str(e)}")
 
     predictions = []
     timestamps = []
@@ -102,7 +92,7 @@ def predict_data(stock_name: str, interval: str, duration: Optional[str]) -> Dic
     return {"prices": predictions_rescaled.tolist(), "timestamps": timestamps}
 
 
-@router.get("/predict", response_model=PredictResponse)
+@router.post("/predict", response_model=PredictResponse)
 async def predict(
     stock_name: str,
     interval: str = Query("1h", enum=["1m", "1h"]),
@@ -116,17 +106,17 @@ async def predict(
             message="Predictions made successfully.",
             data=prediction_data
         )
-    except PredictionError as e:
+    except APIRaisedError as e:
         return PredictResponse(
             success=False,
             status=e.status,
             message=e.message,
-            data={"prices": [], "timestamps": []}
+            data={}
         )
     except Exception as e:
         return PredictResponse(
             success=False,
             status=500,
             message="Internal server error: " + str(e),
-            data={"prices": [], "timestamps": []}
+            data={}
         )

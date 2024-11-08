@@ -1,22 +1,15 @@
 from fastapi import APIRouter
-from pydantic import BaseModel
-from typing import List, Dict
 import yfinance as yf
 import os
+from src.Classes.APIResponseModel import StockOverviewResponse
+
 
 router = APIRouter()
 
 
-class StockOverviewResponse(BaseModel):
-    success: bool
-    status: int
-    message: str
-    data: List[Dict[str, str]]
-
-
 @router.get("/stock-overview", response_model=StockOverviewResponse)
 async def stock_overview():
-    models_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'models'))
+    models_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'models'))
 
     stock_data = []
 
