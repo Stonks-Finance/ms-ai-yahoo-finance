@@ -1,15 +1,7 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
-from typing import List, Dict, Union, Any
 from .endpoints import predict, stock_overview, historical_data, past_values
 
 api = FastAPI()
-
-class ResponseModel(BaseModel):
-    data: Union[Dict[str, Any], List[Any]]
-    success: bool
-    status: int
-    message: str
 
 @api.get("/")
 async def read_root():
