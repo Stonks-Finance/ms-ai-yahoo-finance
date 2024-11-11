@@ -11,6 +11,8 @@ CREATE_MODELS_DIR:str="../create_models"
 MODELS_DIRECTORY = os.path.join(BASE_DIR, _MODELS_DIR)
 TUNING_HISTORIES_DIRECTORY = os.path.join(BASE_DIR, _TUNING_HISTORIES_DIR)
 
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+
 SEED = int(os.getenv("SEED", 6))
 
 
