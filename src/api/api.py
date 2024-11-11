@@ -11,7 +11,7 @@ class ResponseModel(BaseModel):
     status: int
     message: str
 
-@api.get('/')
+@api.get("/")
 async def read_root():
     return {"message": "Welcome to the StonksAPI!"}
 
