@@ -4,12 +4,13 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from src.SEEDS import set_seed
-from typing import Tuple, List,Callable
+from typing import Tuple, List, Callable
 from settings import SEED
 
 set_seed(SEED)
 
-scaler=MinMaxScaler()
+scaler = MinMaxScaler()
+
 
 def scale_data (train_data: pd.DataFrame, test_data: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
     global scaler
@@ -51,25 +52,27 @@ def create_sequences (datas: np.ndarray, seq_length: int = 20) -> Tuple[np.ndarr
         y.append(datas[i + seq_length])
     return np.array(x), np.array(y)
 
-def __add_price_increase_flag (data:pd.DataFrame) -> pd.DataFrame:
+
+def __add_price_increase_flag (data: pd.DataFrame) -> pd.DataFrame:
     data["is_price_increased"] = data["Adj Close"].diff() > 0
     return data
 
 
-def __calculate_adj_close_difference (data:pd.DataFrame) -> pd.DataFrame:
+def __calculate_adj_close_difference (data: pd.DataFrame) -> pd.DataFrame:
     data["adj_close_diff"] = data["Adj Close"].diff().fillna(0)
     return data
 
 
-def __calculate_adj_close_percentage_change (data:pd.DataFrame) -> pd.DataFrame:
+def __calculate_adj_close_percentage_change (data: pd.DataFrame) -> pd.DataFrame:
     data["adj_close_pct_change"] = data["Adj Close"].pct_change().fillna(0)
     return data
 
-def __pipe(data:pd.DataFrame)->pd.DataFrame:
-    functions: List[Callable]=[__add_price_increase_flag,
-                               __calculate_adj_close_difference,
-                               __calculate_adj_close_percentage_change
-                               ]
+
+def pipe (data: pd.DataFrame) -> pd.DataFrame:
+    functions: List[Callable] = [__add_price_increase_flag,
+                                 __calculate_adj_close_difference,
+                                 __calculate_adj_close_percentage_change
+                                 ]
     
     for function in functions:
         data = data.pipe(function)

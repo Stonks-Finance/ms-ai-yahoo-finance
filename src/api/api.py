@@ -1,19 +1,18 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
+from typing import List, Dict, Union, Any
 from .endpoints import predict, stock_overview, historical_data, past_values
 
 api = FastAPI()
 
+class ResponseModel(BaseModel):
+    data: Union[Dict[str, Any], List[Any]]
+    success: bool
+    status: int
+    message: str
+
 @api.get("/")
 async def read_root():
-    """
-    Root endpoint that returns a welcome message for the StonksAPI.
-
-    This endpoint is a simple GET request that serves as the entry point of the API, 
-    providing a message indicating that the API is operational.
-
-    Returns:
-        dict: A dictionary containing a welcome message.
-    """
     return {"message": "Welcome to the StonksAPI!"}
 
 api.include_router(predict.router, tags=["Predict"])

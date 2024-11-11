@@ -11,13 +11,11 @@ class TestModelCreator(unittest.TestCase):
         self.tuner_mock = MockTuner.return_value
         self.model_creator = ModelCreator(
             stock_symbol='AAPL',
-            fmt='.h5',
             intervals=['1d', '1wk']
         )
 
     def test_initialization(self):
         self.assertEqual(self.model_creator.stock_symbol, 'AAPL')
-        self.assertEqual(self.model_creator.fmt, '.h5')
         self.assertEqual(self.model_creator.intervals, ['1d', '1wk'])
         self.assertEqual(self.model_creator.models,
                          os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, "models")))
