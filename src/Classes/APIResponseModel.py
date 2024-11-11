@@ -30,13 +30,13 @@ class StockData(BaseModel):
     highest, and lowest prices for the given time period.
 
     Attributes:
-        time (str): The timestamp for the stock data point (e.g., '2024-11-11T14:30:00').
+        timestamp (str): The timestamp for the stock data point (e.g., '2024-11-11T14:30:00').
         open (float): The opening price of the stock at the given timestamp.
         high (float): The highest price of the stock during the time period.
         low (float): The lowest price of the stock during the time period.
         close (float): The closing price of the stock at the given timestamp.
     """
-    time: str
+    timestamp: str
     open: float
     high: float
     low: float

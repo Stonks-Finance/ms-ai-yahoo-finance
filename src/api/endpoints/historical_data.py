@@ -65,7 +65,7 @@ def get_historical_data (stock_name: str, interval: str, duration: str) -> List[
     past_data = []
     for date, row in stock_data.iterrows():
         past_data.append({
-            "time": date.strftime("%Y-%m-%d"),
+            "timestamp": date.strftime("%Y-%m-%dT%H:%M:%S"),
             "open": float(row['Open'].iloc[0]),
             "high": float(row['High'].iloc[0]),
             "low": float(row['Low'].iloc[0]),
