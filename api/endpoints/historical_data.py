@@ -7,7 +7,6 @@ from dateutil.relativedelta import relativedelta
 from src.Enums.MaxDurationLimit import MaxDurationLimit
 from src.Enums.DefaultDurations import DefaultDurations
 
-
 router = APIRouter()
 
 
@@ -26,7 +25,6 @@ class HistoricalDataResponse(BaseModel):
     data: List[StockData]
 
 
-
 def get_stock_debut_date (stock_name: str) -> Optional[datetime.datetime]:
     stock_info = yf.Ticker(stock_name).info
     debut_date = stock_info.get("firstTradeDate")
@@ -34,7 +32,7 @@ def get_stock_debut_date (stock_name: str) -> Optional[datetime.datetime]:
 
 
 def get_historical_data (stock_name: str, interval: str, duration: int) -> List[Dict[str, float]]:
-
+    start_date=0
     end_date = datetime.datetime.now(tz=datetime.timezone.utc)
     if interval == "1d":
         start_date = end_date - datetime.timedelta(days=duration)
@@ -66,18 +64,20 @@ def get_historical_data (stock_name: str, interval: str, duration: int) -> List[
 
 
 @router.get("/historical-data", response_model=HistoricalDataResponse)
-async def past_values(
-    stock_name: str,
-    interval: str = Query("1d", enum=["1d", "1mo"]),
-    duration: Optional[str] = Query(None)
+async def past_values (
+        stock_name: str,
+        interval: str = Query("1d", enum=["1d", "1mo"]),
+        duration: Optional[str] = Query(None)
 ):
+    default_duration=0
+    max_duration=0
     if interval == "1d":
         max_duration = MaxDurationLimit.ONE_DAY.get_limit("HISTORICAL_DATA")
         default_duration = DefaultDurations.ONE_DAY.get_duration("HISTORICAL_DATA")
     elif interval == "1mo":
         max_duration = MaxDurationLimit.ONE_MONTH.get_limit("HISTORICAL_DATA")
         default_duration = DefaultDurations.ONE_MONTH.get_duration("HISTORICAL_DATA")
-
+    
     if duration is None:
         duration = default_duration
     else:
@@ -90,7 +90,7 @@ async def past_values(
                 "message": "Duration should be an integer.",
                 "data": []
             }
-
+    
     if duration > max_duration or duration < 1:
         return {
             "success": False,
@@ -98,7 +98,7 @@ async def past_values(
             "message": f"Duration for interval '{interval}' cannot exceed {max_duration}.",
             "data": []
         }
-
+    
     try:
         past_data = get_historical_data(stock_name, interval, duration)
         return {
