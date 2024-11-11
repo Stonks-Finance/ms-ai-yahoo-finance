@@ -2,7 +2,6 @@ import os
 import keras
 from keras_tuner import RandomSearch, HyperParameters
 from src.get_data import create_sequences, prepare_data, scaler
-from src.Classes.ConvertToH5Callback import _ConvertToH5Callback
 from matplotlib import pyplot as plt
 from typing import Optional
 from settings import TUNING_HISTORIES_DIRECTORY
@@ -15,7 +14,6 @@ class TuningException(Exception):
 
 class Tuner:
     def __init__ (self,
-                  fmt: str,
                   max_trials: int = 10,
                   executions_per_trial: int = 3,
                   directory: str = TUNING_HISTORIES_DIRECTORY,
@@ -27,7 +25,6 @@ class Tuner:
         self.models_directory: str = models_directory
         self.project_name: str = ""
         self.tuner: Optional[RandomSearch] = None
-        self.fmt: str = fmt
     
     @staticmethod
     def __validate_dropout_params (dropout: bool, dropout_deg: float) -> None:
@@ -99,12 +96,9 @@ class Tuner:
             X_train, y_train = create_sequences(train_data_scaled)
             X_val, y_val = create_sequences(test_data_scaled)
             
-            keras_filepath = os.path.join(self.models_directory,
+            keras_filepath:str = os.path.join(self.models_directory,
                                           stock_symbol,
                                           f"{interval}_{stock_symbol}_best_model.keras")
-            h5_filepath = os.path.join(self.models_directory,
-                                       stock_symbol,
-                                       f"{interval}_{stock_symbol}_best_model.h5")
             
             callbacks = [
                 keras.callbacks.EarlyStopping(monitor=metric,
@@ -123,7 +117,6 @@ class Tuner:
                                                 save_best_only=True,
                                                 verbose=_verbose),
                 
-                _ConvertToH5Callback(keras_filepath=keras_filepath, h5_filepath=h5_filepath)
             ]
             
             self.tuner.search(X_train,

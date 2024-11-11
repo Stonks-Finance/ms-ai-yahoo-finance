@@ -8,14 +8,12 @@ class TestTuner(unittest.TestCase):
     @patch('src.Classes.Tuner.keras.models.Sequential')
     def setUp(self, MockModel):
         self.tuner = Tuner(
-            fmt='.keras',
             max_trials=5,
             executions_per_trial=2
         )
 
     def test_initialization(self):
         self.assertEqual(self.tuner.project_name, "")
-        self.assertEqual(self.tuner.fmt, '.keras')
         self.assertEqual(self.tuner.max_trials, 5)
         self.assertEqual(self.tuner.executions_per_trial, 2)
         self.assertEqual(self.tuner.directory, "tuning_histories")
@@ -36,7 +34,6 @@ class TestTuner(unittest.TestCase):
         mock_prepare_data.return_value = (MagicMock(), MagicMock())
         mock_create_sequences.return_value = (MagicMock(), MagicMock())
         mock_tuner_instance = MockRandomSearch.return_value
-
         best_model = self.tuner._Tuner__tune('AAPL', '1d')
         self.assertIsNotNone(best_model)
 
