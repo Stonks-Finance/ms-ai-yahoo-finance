@@ -19,7 +19,20 @@ cache = TTLCache(maxsize=100, ttl=600)
 
 
 def fetch_stock_data(stock_name: str, period: str, interval: str) -> pd.DataFrame:
-    """Fetch stock data from Yahoo Finance."""
+    """
+    Fetch stock data from Yahoo Finance, and cache it for repeated requests.
+
+    Args:
+        stock_name (str): The ticker symbol of the stock.
+        period (str): The period for which to fetch stock data (e.g., '1d', '2y').
+        interval (str): The time interval between data points (e.g., '1m', '1h').
+
+    Returns:
+        pd.DataFrame: A dataframe containing the stock's adjusted close prices.
+
+    Raises:
+        APIRaisedError: If no data is found for the specified stock.
+    """
     key = f"{stock_name}_{period}_{interval}"
     if key in cache:
         return cache[key]
@@ -34,13 +47,28 @@ def fetch_stock_data(stock_name: str, period: str, interval: str) -> pd.DataFram
     return df
 
 def predict_data(stock_name: str, interval: str, duration: Optional[str]) -> Dict[str, List]:
+    """
+    Generate stock price predictions using a pre-trained LSTM model.
 
+    Args:
+        stock_name (str): The ticker symbol of the stock.
+        interval (str): The time interval between data points (e.g., '1m', '1h').
+        duration (Optional[str]): The number of time points to predict. If None, the default duration for the interval is used.
+
+    Returns:
+        Dict[str, List]: A dictionary containing predicted prices and their corresponding timestamps.
+
+    Raises:
+        APIRaisedError: If the input interval is unsupported or the duration is invalid.
+    """
     if interval == "1m":
         max_duration = MaxDurationLimit.ONE_MINUTE.get_limit("PREDICT")
         default_duration = DefaultDurations.ONE_MINUTE.get_duration("PREDICT")
+        period = "max"
     elif interval == "1h":
         max_duration = MaxDurationLimit.ONE_HOUR.get_limit("PREDICT")
         default_duration = DefaultDurations.ONE_HOUR.get_duration("PREDICT")
+        period = "2y"
     else:
         raise APIRaisedError(400, f"Unsupported interval '{interval}'.")
 
@@ -54,10 +82,6 @@ def predict_data(stock_name: str, interval: str, duration: Optional[str]) -> Dic
 
     if duration > max_duration or duration < 1:
         raise APIRaisedError(400, f"Duration must be between 1 and {max_duration} for interval '{interval}'.")
-
-    period = "max" if interval == "1m" else "2y" if interval == "1h" else None
-    if period is None:
-        raise APIRaisedError(400, f"Unsupported interval '{interval}'.")
 
     df = fetch_stock_data(stock_name, period, interval)
 
@@ -98,6 +122,17 @@ async def predict(
     interval: str = Query("1h", enum=["1m", "1h"]),
     duration: Optional[str] = Query(None)
 ):
+    """
+    API endpoint to predict future stock prices based on historical data.
+
+    Args:
+        stock_name (str): The ticker symbol of the stock.
+        interval (str): The time interval between data points (e.g., '1m', '1h').
+        duration (Optional[str]): The number of time points to predict.
+
+    Returns:
+        PredictResponse: A response model containing the prediction results.
+    """
     try:
         prediction_data = predict_data(stock_name, interval, duration)
         return PredictResponse(
@@ -111,12 +146,12 @@ async def predict(
             success=False,
             status=e.status,
             message=e.message,
-            data={}
+            data=None
         )
     except Exception as e:
         return PredictResponse(
             success=False,
             status=500,
             message="Internal server error: " + str(e),
-            data={}
+            data=None
         )
