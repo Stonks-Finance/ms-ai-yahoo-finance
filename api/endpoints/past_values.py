@@ -1,4 +1,3 @@
-import datetime
 from fastapi import APIRouter, Query
 from pydantic import BaseModel
 from typing import List, Dict, Optional
@@ -17,6 +16,7 @@ class PastValuesResponse(BaseModel):
 
 
 def fetch_past_stock_data (stock_name: str, interval: str, duration: int) -> Dict[str, List]:
+    period:str=""
     if interval == "1m":
         period = "1d"
     elif interval == "1h":
@@ -41,6 +41,8 @@ async def past_values (
         interval: str = Query("1h", enum=["1m", "1h"]),
         duration: Optional[str] = Query(None)
 ):
+    default_duration=0
+    max_duration=0
     if interval == "1m":
         max_duration = MaxDurationLimit.ONE_MINUTE.get_limit("PAST_VALUES")
         default_duration = DefaultDurations.ONE_MINUTE.get_duration("PAST_VALUES")
