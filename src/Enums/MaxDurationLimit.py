@@ -17,11 +17,11 @@ class MaxDurationLimit(Enum):
     """
 
     ONE_MINUTE = {
-        "PREDICT": 30,
+        "PREDICT": 15,
         "PAST_VALUES": 60
     }
     ONE_HOUR = {
-        "PREDICT": 10,
+        "PREDICT": 6,
         "PAST_VALUES": 120,
         "HISTORICAL_DATA": 1000
     }

@@ -39,7 +39,7 @@ async def stock_overview():
     for stock_name in stock_names:
         try:
             data = yf.download(stock_name, period="5d", interval="1d")
-        except Exception as e:
+        except ValueError:
             stock_data.append({"stock_name": stock_name, "change": "Error retrieving data"})
             continue
 

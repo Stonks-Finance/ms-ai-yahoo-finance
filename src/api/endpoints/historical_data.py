@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Query
 from typing import List, Dict, Optional
-import datetime
 import yfinance as yf
 from src.Enums.MaxDurationLimit import MaxDurationLimit
 from src.Enums.DefaultDurations import DefaultDurations
