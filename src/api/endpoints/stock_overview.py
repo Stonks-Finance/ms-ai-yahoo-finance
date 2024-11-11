@@ -9,6 +9,19 @@ router = APIRouter()
 
 @router.get("/stock-overview", response_model=StockOverviewResponse)
 async def stock_overview():
+    """
+    API endpoint to retrieve a stock overview, including the percentage change in adjusted closing prices 
+    for stocks listed in the model directory over the past 5 days.
+
+    The function retrieves stock names from the 'models' directory, attempts to fetch the last 5 days 
+    of stock data from Yahoo Finance, and calculates the percentage change between the current and previous 
+    day's adjusted close price for each stock.
+
+    Returns:
+        dict: A response containing success status, message, and a list of stock names with their respective 
+              percentage price change (or error message if data retrieval fails).
+    """
+    
     models_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'models'))
 
     stock_data = []
@@ -20,7 +33,7 @@ async def stock_overview():
             "success": False,
             "status": 500,
             "message": f"Error accessing model directories: {str(e)}",
-            "data": []
+            "data": None
         }
 
     for stock_name in stock_names:
