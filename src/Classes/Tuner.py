@@ -25,6 +25,7 @@ class Tuner:
         self.models_directory: str = models_directory
         self.project_name: str = ""
         self.tuner: Optional[RandomSearch] = None
+        self.hps=None
     
     @staticmethod
     def __validate_dropout_params (dropout: bool, dropout_deg: float) -> None:
@@ -128,6 +129,7 @@ class Tuner:
                               verbose=_verbose)
             
             best_hps = self.tuner.get_best_hyperparameters(num_trials=1)[0]
+            self.hps=best_hps
             if _verbose:
                 print(f"Best LSTM units: {best_hps.get("lstm_units")}")
                 print(f"Best number of layers: {best_hps.get("num_layers")}")
