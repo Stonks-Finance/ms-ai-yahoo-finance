@@ -11,16 +11,16 @@ else:
 
 def run_api():
     uvicorn.run("api.api:api", host="127.0.0.1", port=8000, reload=False)
-
+    
 if __name__ == "__main__":
-
-    api_thread = threading.Thread(target=run_api)
+    
+    api_thread = threading.Thread(target=run_api, name="APIThread")
     api_thread.start()
     
-    create_thread = threading.Thread(target=run_schedule, args=(30, CREATE_MODELS_DIR))
+    create_thread = threading.Thread(target=run_schedule, args=(30, CREATE_MODELS_DIR), name="CreateScheduleThread")
     create_thread.start()
     
-    refit_thread = threading.Thread(target=run_refit_schedule, args=(15, CREATE_MODELS_DIR))
+    refit_thread = threading.Thread(target=run_refit_schedule, args=(15, CREATE_MODELS_DIR), name="RefitScheduleThread")
     refit_thread.start()
 
     api_thread.join()
