@@ -4,7 +4,7 @@ from keras_tuner import RandomSearch, HyperParameters
 from src.get_data import create_sequences, prepare_data, scaler
 from matplotlib import pyplot as plt
 from typing import Optional
-from settings import TUNING_HISTORIES_DIRECTORY
+from settings import TUNING_HISTORIES_DIRECTORY,MODELS_DIRECTORY
 
 
 class TuningException(Exception):
@@ -17,7 +17,7 @@ class Tuner:
                   max_trials: int = 10,
                   executions_per_trial: int = 3,
                   directory: str = TUNING_HISTORIES_DIRECTORY,
-                  models_directory: str = "models") -> None:
+                  models_directory: str = MODELS_DIRECTORY) -> None:
         
         self.max_trials: int = max_trials
         self.executions_per_trial: int = executions_per_trial

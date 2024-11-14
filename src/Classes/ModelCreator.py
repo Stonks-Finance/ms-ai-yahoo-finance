@@ -2,7 +2,7 @@ import os
 import keras
 from src.Classes.Tuner import Tuner
 from typing import  Dict,Optional
-from settings import TUNING_HISTORIES_DIRECTORY
+from settings import TUNING_HISTORIES_DIRECTORY,MODELS_DIRECTORY
 
 
 class ModelCreator(Tuner):
@@ -11,17 +11,17 @@ class ModelCreator(Tuner):
                   interval: str,
                   max_trials: int = 10,
                   executions_per_trial: int = 3,
-                  directory: str = TUNING_HISTORIES_DIRECTORY,
+                  tuning_dir: str = TUNING_HISTORIES_DIRECTORY,
                   ) -> None:
         project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
         
-        tuning_histories_dir = os.path.join(project_root, directory)
-        models_dir = os.path.join(project_root, "models")
+        tuning_dir = os.path.join(project_root, tuning_dir)
+        models_dir = os.path.join(project_root, MODELS_DIRECTORY)
         
         super().__init__(
             max_trials,
             executions_per_trial,
-            tuning_histories_dir,
+            tuning_dir,
             models_dir)
         
         self.stock_symbol = stock_symbol
