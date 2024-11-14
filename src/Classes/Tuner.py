@@ -4,7 +4,7 @@ from keras_tuner import RandomSearch, HyperParameters
 from src.get_data import create_sequences, prepare_data, scaler
 from matplotlib import pyplot as plt
 from typing import Optional
-from settings import TUNING_HISTORIES_DIRECTORY
+from settings import TUNING_HISTORIES_DIRECTORY,MODELS_DIRECTORY
 
 
 class TuningException(Exception):
@@ -17,7 +17,7 @@ class Tuner:
                   max_trials: int = 10,
                   executions_per_trial: int = 3,
                   directory: str = TUNING_HISTORIES_DIRECTORY,
-                  models_directory: str = "models") -> None:
+                  models_directory: str = MODELS_DIRECTORY) -> None:
         
         self.max_trials: int = max_trials
         self.executions_per_trial: int = executions_per_trial
@@ -25,6 +25,7 @@ class Tuner:
         self.models_directory: str = models_directory
         self.project_name: str = ""
         self.tuner: Optional[RandomSearch] = None
+        self.hps = None
     
     @staticmethod
     def __validate_dropout_params (dropout: bool, dropout_deg: float) -> None:
@@ -96,9 +97,11 @@ class Tuner:
             X_train, y_train = create_sequences(train_data_scaled)
             X_val, y_val = create_sequences(test_data_scaled)
             
-            keras_filepath:str = os.path.join(self.models_directory,
-                                          stock_symbol,
-                                          f"{interval}_{stock_symbol}_best_model.keras")
+            # Ensure the directory exists before saving the model
+            keras_filepath: str = os.path.join(self.models_directory,
+                                               stock_symbol,
+                                               f"{interval}_{stock_symbol}_best_model.keras")
+            os.makedirs(os.path.dirname(keras_filepath), exist_ok=True)
             
             callbacks = [
                 keras.callbacks.EarlyStopping(monitor=metric,
@@ -116,7 +119,6 @@ class Tuner:
                                                 monitor=metric,
                                                 save_best_only=True,
                                                 verbose=_verbose),
-                
             ]
             
             self.tuner.search(X_train,
@@ -128,11 +130,12 @@ class Tuner:
                               verbose=_verbose)
             
             best_hps = self.tuner.get_best_hyperparameters(num_trials=1)[0]
+            self.hps = best_hps
             if _verbose:
-                print(f"Best LSTM units: {best_hps.get("lstm_units")}")
-                print(f"Best number of layers: {best_hps.get("num_layers")}")
-                print(f"Best sequence length: {best_hps.get("seq_length")}")
-                print(f"Best learning rate: {best_hps.get("learning_rate")}")
+                print(f"Best LSTM units: {best_hps.get('lstm_units')}")
+                print(f"Best number of layers: {best_hps.get('num_layers')}")
+                print(f"Best sequence length: {best_hps.get('seq_length')}")
+                print(f"Best learning rate: {best_hps.get('learning_rate')}")
             
             best_model = self.tuner.hypermodel.build(best_hps)
             best_model.fit(X_train,
@@ -142,6 +145,12 @@ class Tuner:
                            batch_size=batch_size,
                            callbacks=callbacks,
                            verbose=_verbose)
+            
+            
+            best_model.save(keras_filepath)
+            
+            # with open(keras_filepath, "a") as file:
+            #     os.fsync(file.fileno())
             
             if plot:
                 self.__plot(best_model, X_val, y_val, stock_symbol)
