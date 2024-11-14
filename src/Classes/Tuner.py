@@ -78,7 +78,7 @@ class Tuner:
                 batch_size: int = 32,
                 metric: str = "val_loss",
                 plot: bool = False,
-                _verbose: bool = True) -> Optional[keras.Model]:
+                _verbose: bool = False) -> Optional[keras.Model]:
         try:
             self.project_name = os.path.join(stock_symbol, f"{stock_symbol}_{interval}_tuning_hist")
             self.tuner = RandomSearch(
