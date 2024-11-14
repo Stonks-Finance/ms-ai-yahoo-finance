@@ -9,7 +9,7 @@ _TUNING_HISTORIES_DIR=str(os.getenv("_TUNING_HISTORIES_DIR"))
 
 _MODELS_DIR=str(os.getenv("_MODELS_DIR"))
 
-CREATE_MODELS_DIR:str="../create_models"
+CREATE_MODELS_DIR:str="create_models"
 
 MODELS_DIRECTORY = os.path.join(BASE_DIR, _MODELS_DIR)
 
