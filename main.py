@@ -21,7 +21,7 @@ if __name__ == "__main__":
     create_thread = SchedulerThread(dur=30, _dir=CREATE_MODELS_DIR, is_refit=False)
     create_thread.start()
 
-    refit_thread = SchedulerThread(dur=2, _dir=CREATE_MODELS_DIR, is_refit=True)
+    refit_thread = SchedulerThread(dur=1, _dir=CREATE_MODELS_DIR, is_refit=True)
     refit_thread.start()
 
     api_thread.join()

@@ -67,4 +67,4 @@ class SchedulerThread(threading.Thread):
                 self._run_all_files(self._dir, filter_1m=True)
             else:
                 print("Market is closed. Stopping '1m' refit process temporarily.")
-            time.sleep(self.dur * 60)
+            time.sleep(self.dur * 30)
