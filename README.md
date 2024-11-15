@@ -1,7 +1,7 @@
 
 To build run:
 ```bash
-   docker build -t stock-predictor-app .
+   docker build -t ai .
 ```
 To run the container:
 ```bash
