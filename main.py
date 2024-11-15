@@ -23,6 +23,6 @@ if __name__ == "__main__":
     refit_thread = SchedulerThread(dur=10, _dir=CREATE_MODELS_DIR, is_refit=True)
     refit_thread.start()
 
-    # api_thread.join()
-    # create_thread.join()
-    # refit_thread.join()
+    api_thread.join()
+    create_thread.join()
+    refit_thread.join()

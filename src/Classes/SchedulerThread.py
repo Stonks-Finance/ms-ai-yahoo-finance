@@ -63,7 +63,7 @@ class SchedulerThread(threading.Thread):
     def run_refit_schedule (self):
         while True:
             if not self._is_market_close():
-                print("Market is open. Running '1m' refit files every 15 minutes.")
+                print(f"Market is open. Running '1m' refit files every {self.dur} minutes.")
                 self._run_all_files(self._dir, filter_1m=True)
             else:
                 print("Market is closed. Stopping '1m' refit process temporarily.")
