@@ -20,3 +20,5 @@ TUNING_HISTORIES_DIRECTORY = os.path.join(BASE_DIR, _TUNING_HISTORIES_DIR)
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 SEED = int(os.getenv("SEED", 6))
+
+IP=os.getenv("IP", "0.0.0.0")
