@@ -5,6 +5,7 @@ from src.get_data import create_sequences, prepare_data, scaler
 from matplotlib import pyplot as plt
 from typing import Optional
 from settings import TUNING_HISTORIES_DIRECTORY,MODELS_DIRECTORY
+from src.Classes.StopTrainingOnMse import StopTrainingOnMSE
 
 
 class TuningException(Exception):
@@ -119,6 +120,8 @@ class Tuner:
                                                 monitor=metric,
                                                 save_best_only=True,
                                                 verbose=_verbose),
+                
+                StopTrainingOnMSE(threshold=0.02)  # Custom callback for early stopping
             ]
             
             self.tuner.search(X_train,
@@ -146,11 +149,7 @@ class Tuner:
                            callbacks=callbacks,
                            verbose=_verbose)
             
-            
             best_model.save(keras_filepath)
-            
-            # with open(keras_filepath, "a") as file:
-            #     os.fsync(file.fileno())
             
             if plot:
                 self.__plot(best_model, X_val, y_val, stock_symbol)
