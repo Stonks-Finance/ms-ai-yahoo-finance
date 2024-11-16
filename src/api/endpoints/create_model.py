@@ -15,15 +15,19 @@ def create_models_for_stock_name(stock_name: str):
 
     if stock_data.empty:
         raise APIRaisedError(404, "No data found for the specified stock.")
-    else:
-        base_folder_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "../../../create_models")
-        )
-        stock_folder_path = os.path.join(base_folder_path, stock_name)
-        
-        os.makedirs(stock_folder_path, exist_ok=True)
 
-        file_template = """
+    model_path = os.path.join("create_models", stock_name)
+    if os.path.exists(model_path):
+        raise APIRaisedError(404, "Model file already exists for specified stock.")
+    
+    base_folder_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "../../../create_models")
+    )
+    stock_folder_path = os.path.join(base_folder_path, stock_name)
+    
+    os.makedirs(stock_folder_path, exist_ok=True)
+
+    file_template = """
 import sys
 import os
 
@@ -36,16 +40,16 @@ creator = ModelCreator("{stock_name}", "{interval}")
 creator.train_tune(plot=False)
 """
 
-        intervals = ["1h", "1m", "5m"]
-        for interval in intervals:
-            file_name = f"create_{interval}_{stock_name}_model.py"
-            file_path = os.path.join(stock_folder_path, file_name)
-            
-            with open(file_path, "w") as file:
-                file_content = file_template.format(stock_name=stock_name, interval=interval)
-                file.write(file_content)
-            
-            os.chmod(file_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+    intervals = ["1h", "1m", "5m"]
+    for interval in intervals:
+        file_name = f"create_{interval}_{stock_name}_model.py"
+        file_path = os.path.join(stock_folder_path, file_name)
+        
+        with open(file_path, "w") as file:
+            file_content = file_template.format(stock_name=stock_name, interval=interval)
+            file.write(file_content)
+        
+        os.chmod(file_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
 
 
 @router.post("/create_model", response_model=CreateModelResponse)
