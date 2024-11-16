@@ -26,6 +26,8 @@ def prepare_data (stock_name: str, interval: str = "1h") -> Tuple[np.ndarray, np
                 data = yf.download(stock_name, period="2y", interval=interval)
             case "1m":
                 data = yf.download(stock_name, period="max", interval=interval)
+            case "5m":
+                data = yf.download(stock_name, period="1mo", interval=interval)
             case _:
                 raise ValueError(f"Invalid interval {interval}")
         

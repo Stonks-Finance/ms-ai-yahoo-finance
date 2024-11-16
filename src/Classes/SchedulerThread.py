@@ -24,13 +24,14 @@ class SchedulerThread(threading.Thread):
             self.run_schedule()
     
     @staticmethod
-    def _run_all_files (directory: str, filter_1m: bool = False) -> None:
+    def _run_all_files (directory: str, filter_1m: bool = False,filter_5m:bool=False) -> None:
         for subdir in os.listdir(directory):
             subdir_path = os.path.join(directory, subdir)
             if os.path.isdir(subdir_path):
                 print(f"Checking directory: {subdir_path}")
                 files = [f for f in os.listdir(subdir_path)
-                         if f.endswith(".py") and ('1m' in f if filter_1m else True)]
+                         if f.endswith(".py") and ('1m' in f if filter_1m else True)
+                         and ("5m" in f if filter_5m else True)]
                 
                 for file in files:
                     file_path = os.path.join(subdir_path, file)
@@ -65,6 +66,7 @@ class SchedulerThread(threading.Thread):
             if not self._is_market_close():
                 print(f"Market is open. Running '1m' refit files every {self.dur} minutes.")
                 self._run_all_files(self._dir, filter_1m=True)
+                self._run_all_files(self._dir, filter_5m=True)
             else:
                 print("Market is closed. Stopping '1m' refit process temporarily.")
             time.sleep(self.dur * 30)
