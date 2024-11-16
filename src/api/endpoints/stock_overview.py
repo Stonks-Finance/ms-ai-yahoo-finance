@@ -2,6 +2,7 @@ from fastapi import APIRouter
 import yfinance as yf
 import os
 from src.Classes.APIResponseModel import StockOverviewResponse
+from src.get_data import pipe
 
 
 router = APIRouter()
@@ -23,7 +24,6 @@ async def stock_overview():
     """
     
     models_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'models'))
-
     stock_data = []
 
     try:
@@ -46,11 +46,10 @@ async def stock_overview():
         if data.empty or len(data) < 2:
             stock_data.append({"stock_name": stock_name, "change": "N/A"})
             continue
-
-        current_price = float(data["Adj Close"].iloc[-1])
-        previous_price = float(data["Adj Close"].iloc[-2])
-
-        change = (current_price - previous_price) / previous_price * 100
+        
+        processed_data = pipe(data) 
+        
+        change = processed_data["adj_close_pct_change"].iloc[-1] * 100
 
         stock_data.append({"stock_name": stock_name, "change": f"{change:.2f}%"})
 

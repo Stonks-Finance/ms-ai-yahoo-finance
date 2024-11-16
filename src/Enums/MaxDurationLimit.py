@@ -20,6 +20,9 @@ class MaxDurationLimit(Enum):
         "PREDICT": 15,
         "PAST_VALUES": 60
     }
+    FIVES_MINUTES = {
+        "PREDICT": 6,
+    }
     ONE_HOUR = {
         "PREDICT": 6,
         "PAST_VALUES": 120,

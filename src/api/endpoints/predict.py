@@ -25,7 +25,7 @@ def fetch_stock_data(stock_name: str, period: str, interval: str) -> pd.DataFram
     Args:
         stock_name (str): The ticker symbol of the stock.
         period (str): The period for which to fetch stock data (e.g., '1d', '2y').
-        interval (str): The time interval between data points (e.g., '1m', '1h').
+        interval (str): The time interval between data points (e.g., '1m', '5m', '1h').
 
     Returns:
         pd.DataFrame: A dataframe containing the stock's adjusted close prices.
@@ -52,7 +52,7 @@ def predict_data(stock_name: str, interval: str, duration: Optional[str]) -> Dic
 
     Args:
         stock_name (str): The ticker symbol of the stock.
-        interval (str): The time interval between data points (e.g., '1m', '1h').
+        interval (str): The time interval between data points (e.g., '1m', '5m', 1h').
         duration (Optional[str]): The number of time points to predict. If None, the default duration for the interval is used.
 
     Returns:
@@ -61,16 +61,21 @@ def predict_data(stock_name: str, interval: str, duration: Optional[str]) -> Dic
     Raises:
         APIRaisedError: If the input interval is unsupported or the duration is invalid.
     """
-    if interval == "1m":
-        max_duration = MaxDurationLimit.ONE_MINUTE.get_limit("PREDICT")
-        default_duration = DefaultDurations.ONE_MINUTE.get_duration("PREDICT")
-        period = "max"
-    elif interval == "1h":
-        max_duration = MaxDurationLimit.ONE_HOUR.get_limit("PREDICT")
-        default_duration = DefaultDurations.ONE_HOUR.get_duration("PREDICT")
-        period = "2y"
-    else:
-        raise APIRaisedError(400, f"Unsupported interval '{interval}'.")
+    match interval:
+        case "1m":
+            max_duration = MaxDurationLimit.ONE_MINUTE.get_limit("PREDICT")
+            default_duration = DefaultDurations.ONE_MINUTE.get_duration("PREDICT")
+            period = "max"
+        case "5m":
+            max_duration = MaxDurationLimit.FIVES_MINUTES.get_limit("PREDICT")
+            default_duration = DefaultDurations.FIVE_MINUTES.get_duration("PREDICT")
+            period = "1mo"
+        case "1h":
+            max_duration = MaxDurationLimit.ONE_HOUR.get_limit("PREDICT")
+            default_duration = DefaultDurations.ONE_HOUR.get_duration("PREDICT")
+            period = "2y"
+        case _:
+            raise APIRaisedError(400, f"Unsupported interval '{interval}'.")
 
     if duration is None:
         duration = default_duration
@@ -100,15 +105,21 @@ def predict_data(stock_name: str, interval: str, duration: Optional[str]) -> Dic
 
     predictions = []
     timestamps = []
+
+    last_timestamp = pd.to_datetime(df.index[-1])
+
     for i in range(duration):
         pred = model.predict(last_seq)
         last_seq = np.append(last_seq[:, 1:, :], np.expand_dims(pred, axis=1), axis=1)
         predictions.append(pred[0, 0])
+
         next_timestamp = 0
         if interval == "1m":
-            next_timestamp = df.index[-1] + timedelta(minutes=(i + 1))
+            next_timestamp = last_timestamp + timedelta(minutes=(i + 1))
+        elif interval == "5m":
+            next_timestamp = last_timestamp + timedelta(minutes=(i * 5 + 5))
         elif interval == "1h":
-            next_timestamp = df.index[-1] + timedelta(hours=(i + 1))
+            next_timestamp = last_timestamp + timedelta(hours=(i + 1))
 
         timestamps.append(next_timestamp.isoformat())
 
@@ -119,7 +130,7 @@ def predict_data(stock_name: str, interval: str, duration: Optional[str]) -> Dic
 @router.post("/predict", response_model=PredictResponse)
 async def predict(
     stock_name: str,
-    interval: str = Query("1h", enum=["1m", "1h"]),
+    interval: str = Query("1h", enum=["1m", "5m", "1h"]),
     duration: Optional[str] = Query(None)
 ):
     """

@@ -101,3 +101,9 @@ class StockOverviewResponse(APIResponseModel[List[Dict[str, str]]]):
         data (List[Dict[str, str]]): A list of dictionaries containing stock names and their price change data.
     """
     pass
+
+class MarketStateResponse(APIResponseModel[bool]):
+    pass
+
+class CreateModelResponse(APIResponseModel):
+    pass
