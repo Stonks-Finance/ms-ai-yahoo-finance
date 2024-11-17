@@ -18,20 +18,16 @@ class SchedulerThread(threading.Thread):
         self.is_refit = is_refit
     
     def run (self):
-        if self.is_refit:
-            self.run_refit_schedule()
-        else:
             self.run_schedule()
     
     @staticmethod
-    def _run_all_files (directory: str,filter_5m:bool=False) -> None:
+    def _run_all_files (directory: str) -> None:
         for subdir in os.listdir(directory):
             subdir_path = os.path.join(directory, subdir)
             if os.path.isdir(subdir_path):
                 print(f"Checking directory: {subdir_path}")
                 files = [f for f in os.listdir(subdir_path)
-                         if f.endswith(".py") and ("5m" in f if filter_5m else True)]
-                
+                         if f.endswith(".py")]
                 for file in files:
                     file_path = os.path.join(subdir_path, file)
                     print(f"Running {file_path}...")
@@ -55,17 +51,12 @@ class SchedulerThread(threading.Thread):
     def run_schedule (self):
         schedule.every(self.dur).minutes.do(self.run_all_files_at_market_close, directory=self._dir)
         print("Monitoring stock market close...")
-        
         while True:
             schedule.run_pending()
             time.sleep(self.dur * 60)
     
     def run_refit_schedule (self):
         while True:
-            if not self._is_market_close():
-                print(f"Market is open. Running '5m' refit files every {self.dur} minutes.")
-                
-                self._run_all_files(self._dir, filter_5m=True)
-            else:
+            if self._is_market_close():
                 print("Market is closed. Stopping '1m' refit process temporarily.")
             time.sleep(self.dur * 30)
