@@ -7,5 +7,5 @@ from src.Classes.ModelCreator import ModelCreator
 
 creator = ModelCreator("AMZN",  "1h")
 
-creator.train_tune(plot=False)
+creator.train_tune(plot=True)
 

@@ -121,7 +121,7 @@ class Tuner:
                                                 save_best_only=True,
                                                 verbose=_verbose),
                 
-                StopTrainingOnMSE(threshold=0.02)  # Custom callback for early stopping
+                #StopTrainingOnMSE(threshold=0.02)
             ]
             
             self.tuner.search(X_train,
