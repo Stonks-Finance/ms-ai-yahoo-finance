@@ -16,7 +16,7 @@ def fetch_past_stock_data (stock_name: str, interval: str, duration: str) -> Dic
 
     Args:
         stock_name (str): The ticker symbol of the stock.
-        interval (str): The time interval between data points (e.g., '1m', '1h').
+        interval (str): The time interval between data points (e.g. '1h').
         duration (str): The number of time points to retrieve.
 
     Returns:
@@ -26,11 +26,7 @@ def fetch_past_stock_data (stock_name: str, interval: str, duration: str) -> Dic
         APIRaisedError: If the interval is unsupported, the duration is invalid, or no data is found for the stock.
     """
 
-    if interval == "1m":
-        max_duration = MaxDurationLimit.ONE_MINUTE.get_limit("PAST_VALUES")
-        default_duration = DefaultDurations.ONE_MINUTE.get_duration("PAST_VALUES")
-        period = "1d"
-    elif interval == "1h":
+    if interval == "1h":
         max_duration = MaxDurationLimit.ONE_HOUR.get_limit("PAST_VALUES")
         default_duration = DefaultDurations.ONE_HOUR.get_duration("PAST_VALUES")
         period = "1mo"
@@ -64,7 +60,7 @@ def fetch_past_stock_data (stock_name: str, interval: str, duration: str) -> Dic
 @router.get("/past-values", response_model=PastValuesResponse)
 async def past_values (
         stock_name: str,
-        interval: str = Query("1h", enum=["1m", "1h"]),
+        interval: str = Query("1h", enum=["1h"]),
         duration: Optional[str] = Query(None)
 ):
     """
@@ -72,7 +68,7 @@ async def past_values (
 
     Args:
         stock_name (str): The ticker symbol of the stock.
-        interval (str): The time interval between data points (e.g., '1m', '1h').
+        interval (str): The time interval between data points (e.g. '1h').
         duration (Optional[str]): The number of past time points to retrieve (default is based on the interval).
 
     Returns:

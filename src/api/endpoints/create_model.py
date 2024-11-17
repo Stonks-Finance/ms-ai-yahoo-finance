@@ -35,21 +35,19 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 
 from src.Classes.ModelCreator import ModelCreator
 
-creator = ModelCreator("{stock_name}", "{interval}")
+creator = ModelCreator("{stock_name}", "1h")
 
 creator.train_tune(plot=False)
 """
 
-    intervals = ["1h", "1m", "5m"]
-    for interval in intervals:
-        file_name = f"create_{interval}_{stock_name}_model.py"
-        file_path = os.path.join(stock_folder_path, file_name)
-        
-        with open(file_path, "w") as file:
-            file_content = file_template.format(stock_name=stock_name, interval=interval)
-            file.write(file_content)
-        
-        os.chmod(file_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+    file_name = f"create_1h_{stock_name}_model.py"
+    file_path = os.path.join(stock_folder_path, file_name)
+    
+    with open(file_path, "w") as file:
+        file_content = file_template.format(stock_name=stock_name)
+        file.write(file_content)
+    
+    os.chmod(file_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
 
 
 @router.post("/create_model", response_model=CreateModelResponse)

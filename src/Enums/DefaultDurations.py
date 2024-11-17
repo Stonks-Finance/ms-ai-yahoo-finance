@@ -1,13 +1,6 @@
 from enum import Enum
 
 class DefaultDurations(Enum):
-    ONE_MINUTE = {
-        "PREDICT": 10,
-        "PAST_VALUES": 15
-    }
-    FIVE_MINUTES = {
-        "PREDICT": 3,
-    }
     ONE_HOUR = {
         "PREDICT": 5,
         "PAST_VALUES": 24,

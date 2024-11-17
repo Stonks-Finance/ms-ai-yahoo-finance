@@ -15,14 +15,6 @@ class MaxDurationLimit(Enum):
         ONE_DAY (dict): Maximum duration for 'HISTORICAL_DATA' (1500) for the 1-day interval.
         ONE_MONTH (dict): Maximum duration for 'HISTORICAL_DATA' (120) for the 1-month interval.
     """
-
-    ONE_MINUTE = {
-        "PREDICT": 15,
-        "PAST_VALUES": 60
-    }
-    FIVES_MINUTES = {
-        "PREDICT": 6,
-    }
     ONE_HOUR = {
         "PREDICT": 6,
         "PAST_VALUES": 120,
