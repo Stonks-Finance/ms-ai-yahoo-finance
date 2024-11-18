@@ -3,7 +3,7 @@ import uvicorn
 from src.Classes.SchedulerThread import SchedulerThread
 from src.api.api import api
 import os
-from settings import DEBUG,CREATE_MODELS_DIR,IP
+from settings import DEBUG,CREATE_MODELS_DIR,IP,PORT
 
 
 if DEBUG:
@@ -12,7 +12,8 @@ else:
     os.environ["TF_CPP_MIN_LOG_LEVEL"] = '2'
 
 def run_api():
-    uvicorn.run(api, host=IP, port=8000, reload=False)
+    uvicorn.run(api, host=IP, port=PORT, reload=False)
+
     
 if __name__ == "__main__":
     api_thread = threading.Thread(target=run_api, name="APIThread")
