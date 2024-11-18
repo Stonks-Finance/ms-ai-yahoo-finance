@@ -21,4 +21,4 @@ SEED: int = int(os.getenv("_SEED", 6))
 
 IP: str = os.getenv("_IP", "0.0.0.0")
 
-PORT: int = int(os.getenv("_PORT", "8000"))
+PORT: int = int(os.getenv("PORT", "8000"))
