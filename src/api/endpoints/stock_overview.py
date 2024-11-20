@@ -40,18 +40,19 @@ async def stock_overview():
         try:
             data = yf.download(stock_name, period="5d", interval="1d")
         except ValueError:
-            stock_data.append({"stock_name": stock_name, "change": "Error retrieving data"})
+            stock_data.append({"stock_name": stock_name, "current_price": "Error retrieving data", "change": "Error retrieving data"})
             continue
 
         if data.empty or len(data) < 2:
-            stock_data.append({"stock_name": stock_name, "change": "N/A"})
+            stock_data.append({"stock_name": stock_name, "current_price": "N/A", "change": "N/A"})
             continue
         
+        current_price = float(data['Adj Close'].iloc[-1].item())
+
         processed_data = pipe(data) 
-        
         change = processed_data["adj_close_pct_change"].iloc[-1] * 100
 
-        stock_data.append({"stock_name": stock_name, "change": f"{change:.2f}%"})
+        stock_data.append({"stock_name": stock_name, "current_price": current_price, "change": f"{change:.2f}%"})
 
     return {
         "success": True,

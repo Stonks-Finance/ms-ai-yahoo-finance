@@ -42,6 +42,11 @@ class StockData(BaseModel):
     low: float
     close: float
 
+class StockOverviewData(BaseModel):
+    stock_name: str
+    current_price: float
+    change: str
+
 class HistoricalDataResponse(APIResponseModel[List[StockData]]):
     """
     Represents the response model for historical stock data.
@@ -87,7 +92,7 @@ class PastValuesResponse(APIResponseModel[Dict[str, List]]):
     """
     pass
 
-class StockOverviewResponse(APIResponseModel[List[Dict[str, str]]]):
+class StockOverviewResponse(APIResponseModel[List[StockOverviewData]]):
     """
     Represents the response model for the stock overview.
     
@@ -98,7 +103,7 @@ class StockOverviewResponse(APIResponseModel[List[Dict[str, str]]]):
         success (bool): Indicates whether the API request was successful.
         status (int): The HTTP status code associated with the response.
         message (str): A message describing the result of the API request.
-        data (List[Dict[str, str]]): A list of dictionaries containing stock names and their price change data.
+        data (List[Dict[str, str]]): A list of dictionaries containing stock names, current Adj Close prices, and their price change data.
     """
     pass
 
