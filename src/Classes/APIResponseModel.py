@@ -43,6 +43,17 @@ class StockData(BaseModel):
     close: float
 
 class StockOverviewData(BaseModel):
+    """
+    Represents an overview of a stock.
+
+    This model includes the stock's name, current price, and the price change
+    percentage or amount.
+
+    Attributes:
+        stock_name (str): The name or ticker symbol of the stock.
+        current_price (float): The current price of the stock.
+        change (str): The price change of the stock, typically as a percentage or a value.
+    """
     stock_name: str
     current_price: float
     change: str
@@ -103,12 +114,36 @@ class StockOverviewResponse(APIResponseModel[List[StockOverviewData]]):
         success (bool): Indicates whether the API request was successful.
         status (int): The HTTP status code associated with the response.
         message (str): A message describing the result of the API request.
-        data (List[Dict[str, str]]): A list of dictionaries containing stock names, current Adj Close prices, and their price change data.
+        data (List[StockOverviewData]): A list of dictionaries containing stock names, current Adj Close prices, and their price change data.
     """
     pass
 
 class MarketStateResponse(APIResponseModel[bool]):
+    """
+    Represents the response model for the market state.
+
+    This class extends the generic `APIResponseModel` and is used specifically for responses containing
+    the state of the market, such as whether it is open or closed.
+
+    Attributes:
+        success (bool): Indicates whether the API request was successful.
+        status (int): The HTTP status code associated with the response.
+        message (str): A message describing the result of the API request.
+        data (bool): A boolean indicating the current market state (True for open, False for closed).
+    """
     pass
 
 class CreateModelResponse(APIResponseModel):
+    """
+    Represents the response model for the model creation process.
+
+    This class extends the generic `APIResponseModel` and is used specifically for responses containing
+    information about the initiation of a model creation process.
+
+    Attributes:
+        success (bool): Indicates whether the API request was successful.
+        status (int): The HTTP status code associated with the response.
+        message (str): A message describing the result of the API request.
+        data (None): This response does not contain additional data.
+    """
     pass
