@@ -10,8 +10,7 @@ class MaxDurationLimit(Enum):
     the corresponding interval name.
 
     Attributes:
-        ONE_MINUTE (dict): Maximum durations for 'PREDICT' (30) and 'PAST_VALUES' (60) for the 1-minute interval.
-        ONE_HOUR (dict): Maximum durations for 'PREDICT' (10), 'PAST_VALUES' (120), and 'HISTORICAL_DATA' (1000) for the 1-hour interval.
+        ONE_HOUR (dict): Maximum durations for 'PREDICT' (6), 'PAST_VALUES' (120), and 'HISTORICAL_DATA' (1000) for the 1-hour interval.
         ONE_DAY (dict): Maximum duration for 'HISTORICAL_DATA' (1500) for the 1-day interval.
         ONE_MONTH (dict): Maximum duration for 'HISTORICAL_DATA' (120) for the 1-month interval.
     """

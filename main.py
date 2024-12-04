@@ -1,18 +1,14 @@
 import threading
-import uvicorn
 from src.Classes.SchedulerThread import SchedulerThread
-from src.api.api import api
+from src.api.api import run_api
 import os
-from settings import DEBUG,CREATE_MODELS_DIR,IP,PORT
+from settings import DEBUG,CREATE_MODELS_DIR
 
 
 if DEBUG:
     os.environ["TF_CPP_MIN_LOG_LEVEL"] = '1'
 else:
     os.environ["TF_CPP_MIN_LOG_LEVEL"] = '2'
-
-def run_api():
-    uvicorn.run(api, host=IP, port=PORT, reload=False)
 
     
 if __name__ == "__main__":

@@ -10,7 +10,16 @@ router = APIRouter()
 
 
 def create_models_for_stock_name(stock_name: str):
-    
+    """
+    Creates a Python script for training a machine learning model based on the stock data 
+    for the given stock name. The script is saved in a specific directory.
+
+    Args:
+        stock_name (str): The ticker symbol of the stock.
+
+    Raises:
+        APIRaisedError: If no data is found for the stock or if a model file already exists for the stock.
+    """
     stock_data = yf.download(stock_name, period="3mo", interval="1h")
 
     if stock_data.empty:
@@ -52,6 +61,24 @@ creator.train_tune(plot=False)
 
 @router.post("/create_model", response_model=CreateModelResponse)
 async def create_model(stock_name: str):
+    """
+    API endpoint to create a machine learning model script for a given stock name.
+
+    This endpoint generates a Python script that trains a model on the stock's 
+    historical data using hourly intervals for the past 3 months. The script is 
+    stored in a designated directory.
+
+    Args:
+        stock_name (str): The ticker symbol of the stock.
+
+    Returns:
+        CreateModelResponse: A response model indicating success or failure, along 
+        with a descriptive message.
+
+    Raises:
+        APIRaisedError: If no stock data is found or if a model file already exists.
+        Exception: If any other error occurs during the script creation process.
+    """
     try:
         create_models_for_stock_name(stock_name)
 
