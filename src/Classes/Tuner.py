@@ -5,7 +5,6 @@ from src.get_data import create_sequences, prepare_data, scaler
 from matplotlib import pyplot as plt
 from typing import Optional
 from settings import TUNING_HISTORIES_DIRECTORY,MODELS_DIRECTORY
-from src.Classes.StopTrainingOnMse import StopTrainingOnMSE
 
 
 class TuningException(Exception):
@@ -81,7 +80,8 @@ class Tuner:
                 plot: bool = False,
                 _verbose: bool = False) -> Optional[keras.Model]:
         try:
-            self.project_name = os.path.join(stock_symbol, f"{stock_symbol}_{interval}_tuning_hist")
+            self.project_name = os.path.join(self.directory,stock_symbol, f"{stock_symbol}_{interval}_tuning_hist")
+            
             self.tuner = RandomSearch(
                 self.__build_model,
                 objective=metric,
@@ -97,8 +97,7 @@ class Tuner:
             
             X_train, y_train = create_sequences(train_data_scaled)
             X_val, y_val = create_sequences(test_data_scaled)
-            
-            # Ensure the directory exists before saving the model
+ 
             keras_filepath: str = os.path.join(self.models_directory,
                                                stock_symbol,
                                                f"{interval}_{stock_symbol}_best_model.keras")
@@ -120,8 +119,7 @@ class Tuner:
                                                 monitor=metric,
                                                 save_best_only=True,
                                                 verbose=_verbose),
-                
-                #StopTrainingOnMSE(threshold=0.02)
+
             ]
             
             self.tuner.search(X_train,

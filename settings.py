@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 BASE_DIR: str = os.path.dirname(os.path.abspath(__file__))
 
 CREATE_MODELS_DIR: str = "create_models"
