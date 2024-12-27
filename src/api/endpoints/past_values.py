@@ -51,7 +51,7 @@ def fetch_past_stock_data (stock_name: str, interval: str, duration: str) -> Dic
     if stock_data.empty:
         raise APIRaisedError(422, f"No data found for stock '{stock_name}'.")
     
-    prices = stock_data["Adj Close"].values.flatten().tolist()
+    prices = stock_data["Close"].values.flatten().tolist()
     timestamps = [date.strftime("%Y-%m-%dT%H:%M:%S") for date in stock_data.index]
     
     return {"prices": prices, "timestamps": timestamps}
