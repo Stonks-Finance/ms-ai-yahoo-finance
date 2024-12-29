@@ -46,8 +46,8 @@ async def stock_overview():
         if data.empty or len(data) < 2:
             stock_data.append({"stock_name": stock_name, "current_price": "N/A", "change": "N/A"})
             continue
-        
-        current_price = float(data['Adj Close'].iloc[-1].item())
+
+        current_price = float(data['Close'].iloc[-1].item())
 
         processed_data = pipe(data) 
         change = processed_data["adj_close_pct_change"].iloc[-1] * 100

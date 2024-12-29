@@ -42,7 +42,7 @@ def fetch_stock_data(stock_name: str, period: str, interval: str) -> pd.DataFram
         raise APIRaisedError(404, "No data found for the specified stock.")
 
     df.index = pd.to_datetime(df.index)
-    df = df[["Adj Close"]].dropna()
+    df = df[["Close"]].dropna()
     cache[key] = df  # Store in cache
     return df
 

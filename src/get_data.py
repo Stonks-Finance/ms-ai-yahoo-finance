@@ -29,12 +29,12 @@ def prepare_data (stock_name: str, interval: str = "1h") -> Tuple[np.ndarray, np
         
         data.index = pd.to_datetime(data.index)
         data.dropna(inplace=True)
-        train_data, test_data = train_test_split(data[["Adj Close"]],
+        train_data, test_data = train_test_split(data[["Close"]],
                                                  test_size=0.2,
                                                  shuffle=False,
                                                  random_state=SEED)
         
-        train_data_sc, test_data_sc = scale_data(train_data[["Adj Close"]], test_data[["Adj Close"]])
+        train_data_sc, test_data_sc = scale_data(train_data[["Close"]], test_data[["Close"]])
         
         return train_data_sc, test_data_sc
     
@@ -52,17 +52,17 @@ def create_sequences (datas: np.ndarray, seq_length: int = 20) -> Tuple[np.ndarr
 
 
 def __add_price_increase_flag (data: pd.DataFrame) -> pd.DataFrame:
-    data["is_price_increased"] = data["Adj Close"].diff() > 0
+    data["is_price_increased"] = data["Close"].diff() > 0
     return data
 
 
 def __calculate_adj_close_difference (data: pd.DataFrame) -> pd.DataFrame:
-    data["adj_close_diff"] = data["Adj Close"].diff().fillna(0)
+    data["adj_close_diff"] = data["Close"].diff().fillna(0)
     return data
 
 
 def __calculate_adj_close_percentage_change (data: pd.DataFrame) -> pd.DataFrame:
-    data["adj_close_pct_change"] = data["Adj Close"].pct_change().fillna(0)
+    data["adj_close_pct_change"] = data["Close"].pct_change().fillna(0)
     return data
 
 
