@@ -8,7 +8,7 @@
 - **Train AI Models**: Builds machine learning models for analyzing and predicting stock trends.
 - **RESTFul API**: Offers endpoints for querying stock changes and forecasting future performance.
 - **Python FastAPI Implementation**: Ensures a lightweight and efficient microservice.
-
+ 
 ## Architecture
 The `ms-ai-yahoo-finance` microservice is part of the **Stonks Finance** architecture, interacting with:
 - **ms-main**: API Gateway for request routing.
